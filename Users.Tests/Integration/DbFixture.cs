@@ -14,13 +14,16 @@ namespace Users.Tests.Integration
         public string EnvironmentName { get; }
 
         public DbFixture()
-        {
-            this.EnvironmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? string.Empty;
+        {            
+            var builder = new ConfigurationBuilder();
 
-            var config = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
-                .AddJsonFile($"appsettings.{this.EnvironmentName}.json", true)
-                .Build();
+            builder.AddJsonFile("appsettings.json");
+
+            this.EnvironmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? string.Empty;
+            if (!string.IsNullOrWhiteSpace(this.EnvironmentName))
+                builder.AddJsonFile($"appsettings.{this.EnvironmentName}.json", true);
+
+            var config = builder.Build();
 
             var connString = config.GetConnectionString("db");
             this.ConnectionString = string.Format(connString, Guid.NewGuid());
