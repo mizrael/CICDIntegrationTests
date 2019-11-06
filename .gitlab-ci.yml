@@ -1,0 +1,41 @@
+image: $CI_REGISTRY/dotnet-sdk-devops:3.0.100-v1.0.1
+
+stages:
+  - build
+  - tests
+  
+##### STAGE: build ##### 
+
+build_project:
+  stage: build  
+  variables:
+    PUBLISH_FULL_PATH: '$CI_PROJECT_DIR/publish'
+  script:
+     - dotnet restore --source $NUGET_SOURCE_URL
+     - dotnet build -c Release --no-restore -o $PUBLISH_FULL_PATH
+  only:
+    - master
+  tags:
+    - linux
+  artifacts:
+    paths:
+    - ./publish
+    expire_in: 1 day
+    
+##### STAGE: tests #####  
+
+run_integration_tests:  
+  services:    
+    - $CI_REGISTRY/redis:v1.2-4.0.9
+    - $CI_REGISTRY/mssql-server:14-v1.0    
+  variables:
+    ACCEPT_EULA: "Y"
+    SA_PASSWORD: d-2npz7Czkrp
+    MSSQL_SA_PASSWORD: d-2npz7Czkrp
+  stage: tests
+  tags:
+    - linux
+  script: 
+    - dotnet restore --source $NUGET_SOURCE_URL
+    - dotnet build --no-restore 
+    - dotnet test --no-build --verbosity m --no-restore
