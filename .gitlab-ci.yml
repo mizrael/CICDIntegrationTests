@@ -26,7 +26,6 @@ build_project:
 
 run_integration_tests:  
   services:    
-    - $CI_REGISTRY/redis:v1.2-4.0.9
     - $CI_REGISTRY/mssql-server:14-v1.0    
   variables:
     ACCEPT_EULA: "Y"
